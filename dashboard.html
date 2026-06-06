@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sales Dashboard 2024 — Elevate Labs</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e2d47;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --accent4: #f59e0b;
+    --accent5: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --white: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px var(--accent);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.2)} }
+  .logo h1 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--white); letter-spacing: -0.5px; }
+  .logo span { color: var(--accent); }
+  .header-right { display: flex; gap: 8px; align-items: center; }
+  .badge {
+    padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500;
+    background: rgba(0,229,255,0.1); color: var(--accent); border: 1px solid rgba(0,229,255,0.2);
+  }
+
+  /* NAV */
+  .nav {
+    display: flex; gap: 4px;
+    background: var(--surface);
+    padding: 8px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-btn {
+    padding: 7px 18px; border-radius: 8px; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    color: var(--muted); background: transparent; transition: all .2s;
+  }
+  .nav-btn:hover { color: var(--text); background: var(--border); }
+  .nav-btn.active { background: rgba(0,229,255,0.1); color: var(--accent); }
+
+  /* FILTERS */
+  .filters {
+    display: flex; gap: 12px; align-items: center;
+    padding: 14px 32px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .filter-label { font-size: 12px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .5px; }
+  .slicer {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .slicer-btn {
+    padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--muted); font-size: 12px;
+    cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif;
+  }
+  .slicer-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .slicer-btn.active { background: rgba(0,229,255,0.1); border-color: var(--accent); color: var(--accent); }
+  .filter-divider { width: 1px; height: 24px; background: var(--border); }
+
+  /* MAIN */
+  .main { padding: 24px 32px; }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s, border-color .2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .kpi-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .kpi-card.c1::before { background: linear-gradient(90deg, var(--accent), transparent); }
+  .kpi-card.c2::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+  .kpi-card.c3::before { background: linear-gradient(90deg, var(--accent3), transparent); }
+  .kpi-card.c4::before { background: linear-gradient(90deg, var(--accent4), transparent); }
+  .kpi-icon { font-size: 22px; margin-bottom: 10px; }
+  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+  .kpi-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--white); }
+  .kpi-sub { font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .kpi-sub.up { color: var(--accent3); }
+  .kpi-sub.down { color: var(--accent5); }
+
+  /* CHART GRID */
+  .chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .chart-grid2 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color .2s;
+  }
+  .chart-card:hover { border-color: rgba(0,229,255,0.3); }
+  .chart-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px; font-weight: 700;
+    color: var(--white); margin-bottom: 4px;
+  }
+  .chart-sub { font-size: 11px; color: var(--muted); margin-bottom: 16px; }
+  .chart-wrap { position: relative; }
+
+  /* TABLE */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  thead th {
+    font-size: 11px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .6px; text-align: left; padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td {
+    padding: 10px 12px; font-size: 13px; color: var(--text);
+    border-bottom: 1px solid rgba(30,45,71,.5);
+  }
+  tbody tr:hover { background: rgba(0,229,255,0.03); }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 500;
+  }
+  .tag-elec { background: rgba(0,229,255,0.1); color: var(--accent); }
+  .tag-furn { background: rgba(124,58,237,0.15); color: #a78bfa; }
+  .tag-off  { background: rgba(16,185,129,0.1); color: var(--accent3); }
+  .profit-bar-wrap { width: 80px; height: 6px; background: var(--border); border-radius: 3px; }
+  .profit-bar { height: 100%; border-radius: 3px; background: var(--accent3); }
+
+  /* FOOTER */
+  .footer {
+    text-align: center; padding: 16px;
+    color: var(--muted); font-size: 11px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* PAGE SECTIONS */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Animation */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  .kpi-card, .chart-card, .table-card { animation: fadeUp .4s ease both; }
+  .kpi-card:nth-child(1){animation-delay:.05s}
+  .kpi-card:nth-child(2){animation-delay:.1s}
+  .kpi-card:nth-child(3){animation-delay:.15s}
+  .kpi-card:nth-child(4){animation-delay:.2s}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <h1>Sales<span>IQ</span> Dashboard</h1>
+  </div>
+  <div class="header-right">
+    <span class="badge">📊 FY 2024</span>
+    <span class="badge">Live Data</span>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('overview', this)">Overview</button>
+  <button class="nav-btn" onclick="showPage('trends', this)">Trends</button>
+  <button class="nav-btn" onclick="showPage('categories', this)">Categories</button>
+  <button class="nav-btn" onclick="showPage('regions', this)">Regions</button>
+</nav>
+
+<!-- FILTERS -->
+<div class="filters">
+  <span class="filter-label">Quarter</span>
+  <div class="slicer" id="qFilter">
+    <button class="slicer-btn active" onclick="filterQ('All',this)">All</button>
+    <button class="slicer-btn" onclick="filterQ('Q1',this)">Q1</button>
+    <button class="slicer-btn" onclick="filterQ('Q2',this)">Q2</button>
+    <button class="slicer-btn" onclick="filterQ('Q3',this)">Q3</button>
+    <button class="slicer-btn" onclick="filterQ('Q4',this)">Q4</button>
+  </div>
+  <div class="filter-divider"></div>
+  <span class="filter-label">Region</span>
+  <div class="slicer" id="rFilter">
+    <button class="slicer-btn active" onclick="filterR('All',this)">All</button>
+    <button class="slicer-btn" onclick="filterR('North',this)">North</button>
+    <button class="slicer-btn" onclick="filterR('South',this)">South</button>
+    <button class="slicer-btn" onclick="filterR('East',this)">East</button>
+    <button class="slicer-btn" onclick="filterR('West',this)">West</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- OVERVIEW PAGE -->
+  <div class="page active" id="page-overview">
+    <!-- KPI Cards -->
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi-card c1">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-label">Total Sales</div>
+        <div class="kpi-value" id="kv-sales">$0</div>
+        <div class="kpi-sub up" id="ks-sales">↑ +12.4% vs last period</div>
+      </div>
+      <div class="kpi-card c2">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-label">Total Profit</div>
+        <div class="kpi-value" id="kv-profit">$0</div>
+        <div class="kpi-sub up" id="ks-profit">↑ +8.7% margin</div>
+      </div>
+      <div class="kpi-card c3">
+        <div class="kpi-icon">📦</div>
+        <div class="kpi-label">Total Orders</div>
+        <div class="kpi-value" id="kv-orders">0</div>
+        <div class="kpi-sub up">↑ Across all regions</div>
+      </div>
+      <div class="kpi-card c4">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-label">Profit Margin</div>
+        <div class="kpi-value" id="kv-margin">0%</div>
+        <div class="kpi-sub up">↑ Strong profitability</div>
+      </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Monthly Sales & Profit</div>
+        <div class="chart-sub">Revenue trend across 2024</div>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="lineChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Sales by Category</div>
+        <div class="chart-sub">Distribution breakdown</div>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="doughnutChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="chart-grid2">
+      <div class="chart-card">
+        <div class="chart-title">Regional Performance</div>
+        <div class="chart-sub">Sales by region</div>
+        <div class="chart-wrap" style="height:200px">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Category Profit</div>
+        <div class="chart-sub">Profit by category</div>
+        <div class="chart-wrap" style="height:200px">
+          <canvas id="horizBar"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Quarterly Growth</div>
+        <div class="chart-sub">Quarter-over-quarter</div>
+        <div class="chart-wrap" style="height:200px">
+          <canvas id="qChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Products Table -->
+    <div class="table-card">
+      <div class="chart-title">Top Products by Sales</div>
+      <div class="chart-sub">Filtered view — best performing products</div>
+      <table id="prodTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Sales</th>
+            <th>Profit</th>
+            <th>Orders</th>
+            <th>Profit %</th>
+          </tr>
+        </thead>
+        <tbody id="prodBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TRENDS PAGE -->
+  <div class="page" id="page-trends">
+    <div class="chart-card" style="margin-bottom:16px">
+      <div class="chart-title">Sales vs Profit — Monthly Trend (Full Year)</div>
+      <div class="chart-sub">Time-series analysis with growth overlay</div>
+      <div class="chart-wrap" style="height:320px">
+        <canvas id="trendLine"></canvas>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Cumulative Sales Growth</div>
+        <div class="chart-sub">Running total 2024</div>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="areaChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Avg Order Value by Month</div>
+        <div class="chart-sub">Per-transaction revenue</div>
+        <div class="chart-wrap" style="height:240px">
+          <canvas id="avgChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORIES PAGE -->
+  <div class="page" id="page-categories">
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Category Sales Comparison</div>
+        <div class="chart-sub">Electronics vs Furniture vs Office Supplies</div>
+        <div class="chart-wrap" style="height:280px">
+          <canvas id="catBar"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Category Profit Share</div>
+        <div class="chart-sub">Who drives the most profit</div>
+        <div class="chart-wrap" style="height:280px">
+          <canvas id="catPie"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="chart-card" style="margin-top:16px">
+      <div class="chart-title">Category Performance by Quarter</div>
+      <div class="chart-sub">Quarterly breakdown per category</div>
+      <div class="chart-wrap" style="height:260px">
+        <canvas id="catQBar"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGIONS PAGE -->
+  <div class="page" id="page-regions">
+    <div class="kpi-grid">
+      <div class="kpi-card c1"><div class="kpi-icon">🧭</div><div class="kpi-label">North Sales</div><div class="kpi-value" id="r-north">—</div></div>
+      <div class="kpi-card c2"><div class="kpi-icon">🧭</div><div class="kpi-label">South Sales</div><div class="kpi-value" id="r-south">—</div></div>
+      <div class="kpi-card c3"><div class="kpi-icon">🧭</div><div class="kpi-label">East Sales</div><div class="kpi-value" id="r-east">—</div></div>
+      <div class="kpi-card c4"><div class="kpi-icon">🧭</div><div class="kpi-label">West Sales</div><div class="kpi-value" id="r-west">—</div></div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Region Sales Comparison</div>
+        <div class="chart-sub">All four regions side by side</div>
+        <div class="chart-wrap" style="height:280px">
+          <canvas id="regBar"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Regional Market Share</div>
+        <div class="chart-sub">% contribution to total sales</div>
+        <div class="chart-wrap" style="height:280px">
+          <canvas id="regPie"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div class="footer">Sales Dashboard 2024 — Elevate Labs Data Analyst Internship · Task 4 · Karmveer Kumar</div>
+
+<script>
+// ============================================================
+// RAW DATA
+// ============================================================
+const rawData = [
+  {id:"1001",date:"2024-01-05",month:"Jan",q:"Q1",region:"North",cat:"Electronics",product:"Laptop",sales:1200,profit:240,qty:1},
+  {id:"1002",date:"2024-01-08",month:"Jan",q:"Q1",region:"South",cat:"Furniture",product:"Chair",sales:700,profit:140,qty:2},
+  {id:"1003",date:"2024-01-12",month:"Jan",q:"Q1",region:"East",cat:"Electronics",product:"Phone",sales:2400,profit:480,qty:3},
+  {id:"1004",date:"2024-01-15",month:"Jan",q:"Q1",region:"West",cat:"Office Supplies",product:"Pens",sales:450,profit:90,qty:10},
+  {id:"1005",date:"2024-01-20",month:"Jan",q:"Q1",region:"North",cat:"Furniture",product:"Desk",sales:650,profit:130,qty:1},
+  {id:"1006",date:"2024-02-02",month:"Feb",q:"Q1",region:"South",cat:"Electronics",product:"Tablet",sales:1900,profit:380,qty:2},
+  {id:"1007",date:"2024-02-07",month:"Feb",q:"Q1",region:"East",cat:"Office Supplies",product:"Paper",sales:600,profit:120,qty:5},
+  {id:"1008",date:"2024-02-11",month:"Feb",q:"Q1",region:"West",cat:"Furniture",product:"Bookshelf",sales:420,profit:84,qty:1},
+  {id:"1009",date:"2024-02-14",month:"Feb",q:"Q1",region:"North",cat:"Electronics",product:"Monitor",sales:1100,profit:220,qty:2},
+  {id:"1010",date:"2024-02-19",month:"Feb",q:"Q1",region:"South",cat:"Office Supplies",product:"Stapler",sales:240,profit:48,qty:3},
+  {id:"1011",date:"2024-03-03",month:"Mar",q:"Q1",region:"East",cat:"Electronics",product:"Laptop",sales:1300,profit:260,qty:1},
+  {id:"1012",date:"2024-03-06",month:"Mar",q:"Q1",region:"West",cat:"Furniture",product:"Chair",sales:760,profit:152,qty:2},
+  {id:"1013",date:"2024-03-10",month:"Mar",q:"Q1",region:"North",cat:"Electronics",product:"Phone",sales:1700,profit:340,qty:2},
+  {id:"1014",date:"2024-03-15",month:"Mar",q:"Q1",region:"South",cat:"Office Supplies",product:"Notebook",sales:480,profit:96,qty:8},
+  {id:"1015",date:"2024-03-20",month:"Mar",q:"Q1",region:"East",cat:"Furniture",product:"Desk",sales:700,profit:140,qty:1},
+  {id:"1016",date:"2024-04-04",month:"Apr",q:"Q2",region:"West",cat:"Electronics",product:"Tablet",sales:1000,profit:200,qty:1},
+  {id:"1017",date:"2024-04-08",month:"Apr",q:"Q2",region:"North",cat:"Office Supplies",product:"Paper",sales:360,profit:72,qty:4},
+  {id:"1018",date:"2024-04-12",month:"Apr",q:"Q2",region:"South",cat:"Furniture",product:"Bookshelf",sales:900,profit:180,qty:2},
+  {id:"1019",date:"2024-04-17",month:"Apr",q:"Q2",region:"East",cat:"Electronics",product:"Monitor",sales:600,profit:120,qty:1},
+  {id:"1020",date:"2024-04-22",month:"Apr",q:"Q2",region:"West",cat:"Office Supplies",product:"Pens",sales:600,profit:120,qty:12},
+  {id:"1021",date:"2024-05-05",month:"May",q:"Q2",region:"North",cat:"Electronics",product:"Laptop",sales:1150,profit:230,qty:1},
+  {id:"1022",date:"2024-05-09",month:"May",q:"Q2",region:"South",cat:"Furniture",product:"Chair",sales:960,profit:192,qty:3},
+  {id:"1023",date:"2024-05-14",month:"May",q:"Q2",region:"East",cat:"Electronics",product:"Phone",sales:1560,profit:312,qty:2},
+  {id:"1024",date:"2024-05-18",month:"May",q:"Q2",region:"West",cat:"Office Supplies",product:"Stapler",sales:300,profit:60,qty:4},
+  {id:"1025",date:"2024-05-23",month:"May",q:"Q2",region:"North",cat:"Furniture",product:"Desk",sales:680,profit:136,qty:1},
+  {id:"1026",date:"2024-06-01",month:"Jun",q:"Q2",region:"South",cat:"Electronics",product:"Tablet",sales:1840,profit:368,qty:2},
+  {id:"1027",date:"2024-06-06",month:"Jun",q:"Q2",region:"East",cat:"Office Supplies",product:"Paper",sales:660,profit:132,qty:6},
+  {id:"1028",date:"2024-06-10",month:"Jun",q:"Q2",region:"West",cat:"Furniture",product:"Bookshelf",sales:400,profit:80,qty:1},
+  {id:"1029",date:"2024-06-15",month:"Jun",q:"Q2",region:"North",cat:"Electronics",product:"Monitor",sales:1160,profit:232,qty:2},
+  {id:"1030",date:"2024-06-20",month:"Jun",q:"Q2",region:"South",cat:"Office Supplies",product:"Notebook",sales:495,profit:99,qty:9},
+  {id:"1031",date:"2024-07-03",month:"Jul",q:"Q3",region:"East",cat:"Electronics",product:"Laptop",sales:1250,profit:250,qty:1},
+  {id:"1032",date:"2024-07-07",month:"Jul",q:"Q3",region:"West",cat:"Furniture",product:"Chair",sales:720,profit:144,qty:2},
+  {id:"1033",date:"2024-07-11",month:"Jul",q:"Q3",region:"North",cat:"Electronics",product:"Phone",sales:820,profit:164,qty:1},
+  {id:"1034",date:"2024-07-16",month:"Jul",q:"Q3",region:"South",cat:"Office Supplies",product:"Paper",sales:500,profit:100,qty:5},
+  {id:"1035",date:"2024-07-21",month:"Jul",q:"Q3",region:"East",cat:"Furniture",product:"Desk",sales:720,profit:144,qty:1},
+  {id:"1036",date:"2024-08-05",month:"Aug",q:"Q3",region:"West",cat:"Electronics",product:"Tablet",sales:980,profit:196,qty:1},
+  {id:"1037",date:"2024-08-09",month:"Aug",q:"Q3",region:"North",cat:"Office Supplies",product:"Pens",sales:550,profit:110,qty:10},
+  {id:"1038",date:"2024-08-13",month:"Aug",q:"Q3",region:"South",cat:"Furniture",product:"Bookshelf",sales:860,profit:172,qty:2},
+  {id:"1039",date:"2024-08-18",month:"Aug",q:"Q3",region:"East",cat:"Electronics",product:"Monitor",sales:570,profit:114,qty:1},
+  {id:"1040",date:"2024-08-22",month:"Aug",q:"Q3",region:"West",cat:"Office Supplies",product:"Stapler",sales:210,profit:42,qty:3},
+  {id:"1041",date:"2024-09-04",month:"Sep",q:"Q3",region:"North",cat:"Electronics",product:"Laptop",sales:1350,profit:270,qty:1},
+  {id:"1042",date:"2024-09-08",month:"Sep",q:"Q3",region:"South",cat:"Furniture",product:"Chair",sales:780,profit:156,qty:2},
+  {id:"1043",date:"2024-09-12",month:"Sep",q:"Q3",region:"East",cat:"Electronics",product:"Phone",sales:2700,profit:540,qty:3},
+  {id:"1044",date:"2024-09-17",month:"Sep",q:"Q3",region:"West",cat:"Office Supplies",product:"Notebook",sales:455,profit:91,qty:7},
+  {id:"1045",date:"2024-09-22",month:"Sep",q:"Q3",region:"North",cat:"Furniture",product:"Desk",sales:750,profit:150,qty:1},
+  {id:"1046",date:"2024-10-06",month:"Oct",q:"Q4",region:"South",cat:"Electronics",product:"Tablet",sales:2100,profit:420,qty:2},
+  {id:"1047",date:"2024-10-10",month:"Oct",q:"Q4",region:"East",cat:"Office Supplies",product:"Paper",sales:780,profit:156,qty:6},
+  {id:"1048",date:"2024-10-15",month:"Oct",q:"Q4",region:"West",cat:"Furniture",product:"Bookshelf",sales:460,profit:92,qty:1},
+  {id:"1049",date:"2024-10-20",month:"Oct",q:"Q4",region:"North",cat:"Electronics",product:"Monitor",sales:1240,profit:248,qty:2},
+  {id:"1050",date:"2024-10-25",month:"Oct",q:"Q4",region:"South",cat:"Office Supplies",product:"Pens",sales:900,profit:180,qty:15},
+  {id:"1051",date:"2024-11-03",month:"Nov",q:"Q4",region:"East",cat:"Electronics",product:"Laptop",sales:1400,profit:280,qty:1},
+  {id:"1052",date:"2024-11-07",month:"Nov",q:"Q4",region:"West",cat:"Furniture",product:"Chair",sales:1230,profit:246,qty:3},
+  {id:"1053",date:"2024-11-11",month:"Nov",q:"Q4",region:"North",cat:"Electronics",product:"Phone",sales:1900,profit:380,qty:2},
+  {id:"1054",date:"2024-11-16",month:"Nov",q:"Q4",region:"South",cat:"Office Supplies",product:"Stapler",sales:340,profit:68,qty:4},
+  {id:"1055",date:"2024-11-21",month:"Nov",q:"Q4",region:"East",cat:"Furniture",product:"Desk",sales:780,profit:156,qty:1},
+  {id:"1056",date:"2024-12-02",month:"Dec",q:"Q4",region:"West",cat:"Electronics",product:"Tablet",sales:1100,profit:220,qty:1},
+  {id:"1057",date:"2024-12-06",month:"Dec",q:"Q4",region:"North",cat:"Office Supplies",product:"Paper",sales:980,profit:196,qty:7},
+  {id:"1058",date:"2024-12-10",month:"Dec",q:"Q4",region:"South",cat:"Furniture",product:"Bookshelf",sales:960,profit:192,qty:2},
+  {id:"1059",date:"2024-12-15",month:"Dec",q:"Q4",region:"East",cat:"Electronics",product:"Monitor",sales:640,profit:128,qty:1},
+  {id:"1060",date:"2024-12-20",month:"Dec",q:"Q4",region:"West",cat:"Office Supplies",product:"Notebook",sales:560,profit:112,qty:8},
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let activeQ = 'All', activeR = 'All';
+const charts = {};
+
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const COLORS = {
+  accent:  '#00e5ff', accent2: '#7c3aed', accent3: '#10b981',
+  accent4: '#f59e0b', accent5: '#ef4444', muted: '#64748b',
+  border:  '#1e2d47', surface: '#1a2236'
+};
+const CAT_COLORS = { Electronics: '#00e5ff', Furniture: '#7c3aed', 'Office Supplies': '#10b981' };
+const REG_COLORS = { North: '#00e5ff', South: '#7c3aed', East: '#10b981', West: '#f59e0b' };
+
+// ============================================================
+// FILTERS
+// ============================================================
+function getFiltered() {
+  return rawData.filter(d =>
+    (activeQ === 'All' || d.q === activeQ) &&
+    (activeR === 'All' || d.region === activeR)
+  );
+}
+function filterQ(q, btn) {
+  activeQ = q;
+  document.querySelectorAll('#qFilter .slicer-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  refresh();
+}
+function filterR(r, btn) {
+  activeR = r;
+  document.querySelectorAll('#rFilter .slicer-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  refresh();
+}
+
+// ============================================================
+// NAV
+// ============================================================
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ============================================================
+// CHART HELPERS
+// ============================================================
+const defaultFont = { family: "'DM Sans', sans-serif", size: 11, color: COLORS.muted };
+const gridColor = 'rgba(30,45,71,0.8)';
+
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function mkChart(id, type, data, options) {
+  destroyChart(id);
+  const ctx = document.getElementById(id).getContext('2d');
+  charts[id] = new Chart(ctx, { type, data, options });
+}
+
+function baseOpts(extra = {}) {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: COLORS.muted, font: defaultFont, boxWidth: 10 } },
+      tooltip: { backgroundColor: '#111827', titleColor: '#e2e8f0', bodyColor: '#94a3b8', borderColor: COLORS.border, borderWidth: 1 }
+    },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { color: COLORS.muted, font: defaultFont } },
+      y: { grid: { color: gridColor }, ticks: { color: COLORS.muted, font: defaultFont } }
+    },
+    ...extra
+  };
+}
+
+// ============================================================
+// REFRESH ALL
+// ============================================================
+function refresh() {
+  const data = getFiltered();
+  updateKPIs(data);
+  buildLineChart(data);
+  buildDoughnut(data);
+  buildBarChart(data);
+  buildHorizBar(data);
+  buildQChart(data);
+  buildTable(data);
+  buildTrendLine(data);
+  buildAreaChart(data);
+  buildAvgChart(data);
+  buildCatBar(data);
+  buildCatPie(data);
+  buildCatQBar(data);
+  buildRegCharts(data);
+}
+
+// ============================================================
+// KPIs
+// ============================================================
+function fmt(n) { return '$' + n.toLocaleString(); }
+function updateKPIs(data) {
+  const totalSales  = data.reduce((s,d) => s + d.sales, 0);
+  const totalProfit = data.reduce((s,d) => s + d.profit, 0);
+  const orders = data.length;
+  const margin = totalSales > 0 ? ((totalProfit / totalSales) * 100).toFixed(1) : 0;
+  document.getElementById('kv-sales').textContent  = fmt(totalSales);
+  document.getElementById('kv-profit').textContent = fmt(totalProfit);
+  document.getElementById('kv-orders').textContent = orders;
+  document.getElementById('kv-margin').textContent = margin + '%';
+}
+
+// ============================================================
+// OVERVIEW CHARTS
+// ============================================================
+function buildLineChart(data) {
+  const byMonth = {};
+  MONTHS.forEach(m => byMonth[m] = { sales:0, profit:0 });
+  data.forEach(d => { byMonth[d.month].sales += d.sales; byMonth[d.month].profit += d.profit; });
+  const labels = MONTHS.filter(m => data.some(d => d.month === m));
+  mkChart('lineChart', 'line', {
+    labels,
+    datasets: [
+      { label: 'Sales', data: labels.map(m => byMonth[m].sales), borderColor: COLORS.accent, backgroundColor: 'rgba(0,229,255,.08)', fill: true, tension: .4, pointBackgroundColor: COLORS.accent, pointRadius: 4 },
+      { label: 'Profit', data: labels.map(m => byMonth[m].profit), borderColor: COLORS.accent3, backgroundColor: 'rgba(16,185,129,.08)', fill: true, tension: .4, pointBackgroundColor: COLORS.accent3, pointRadius: 4 }
+    ]
+  }, baseOpts({ plugins: { legend: { position: 'top', labels: { color: COLORS.muted, font: defaultFont, boxWidth: 10 } }, tooltip: { backgroundColor:'#111827', borderColor: COLORS.border, borderWidth:1, titleColor:'#e2e8f0', bodyColor:'#94a3b8' } } }));
+}
+
+function buildDoughnut(data) {
+  const cats = ['Electronics','Furniture','Office Supplies'];
+  const vals = cats.map(c => data.filter(d => d.cat === c).reduce((s,d) => s + d.sales, 0));
+  mkChart('doughnutChart', 'doughnut', {
+    labels: cats,
+    datasets: [{ data: vals, backgroundColor: [COLORS.accent, COLORS.accent2, COLORS.accent3], borderColor: '#111827', borderWidth: 3, hoverOffset: 8 }]
+  }, { ...baseOpts(), scales: {}, cutout: '65%', plugins: { legend: { position:'bottom', labels:{ color: COLORS.muted, font: defaultFont, boxWidth:10, padding:12 } }, tooltip:{ backgroundColor:'#111827', borderColor:COLORS.border, borderWidth:1, titleColor:'#e2e8f0', bodyColor:'#94a3b8' } } });
+}
+
+function buildBarChart(data) {
+  const regs = ['North','South','East','West'];
+  const vals = regs.map(r => data.filter(d => d.region === r).reduce((s,d) => s + d.sales, 0));
+  mkChart('barChart', 'bar', {
+    labels: regs,
+    datasets: [{ label: 'Sales', data: vals, backgroundColor: [COLORS.accent, COLORS.accent2, COLORS.accent3, COLORS.accent4], borderRadius: 6, borderSkipped: false }]
+  }, { ...baseOpts(), plugins: { legend: {display:false}, tooltip:{backgroundColor:'#111827',borderColor:COLORS.border,borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8'} } });
+}
+
+function buildHorizBar(data) {
+  const cats = ['Electronics','Furniture','Office Supplies'];
+  const vals = cats.map(c => data.filter(d => d.cat === c).reduce((s,d) => s + d.profit, 0));
+  mkChart('horizBar', 'bar', {
+    labels: cats,
+    datasets: [{ label: 'Profit', data: vals, backgroundColor: [COLORS.accent, COLORS.accent2, COLORS.accent3], borderRadius: 6, borderSkipped: false }]
+  }, { ...baseOpts({ indexAxis:'y' }), plugins: { legend:{display:false}, tooltip:{backgroundColor:'#111827',borderColor:COLORS.border,borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8'} } });
+}
+
+function buildQChart(data) {
+  const qs = ['Q1','Q2','Q3','Q4'];
+  const vals = qs.map(q => data.filter(d => d.q === q).reduce((s,d) => s + d.sales, 0));
+  mkChart('qChart', 'bar', {
+    labels: qs,
+    datasets: [{ label: 'Sales', data: vals, backgroundColor: [COLORS.accent+'40',COLORS.accent+'60',COLORS.accent+'90',COLORS.accent], borderRadius: 8, borderSkipped: false }]
+  }, { ...baseOpts(), plugins: { legend:{display:false}, tooltip:{backgroundColor:'#111827',borderColor:COLORS.border,borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8'} } });
+}
+
+// ============================================================
+// TABLE
+// ============================================================
+function buildTable(data) {
+  const prodMap = {};
+  data.forEach(d => {
+    if (!prodMap[d.product]) prodMap[d.product] = { product: d.product, cat: d.cat, sales: 0, profit: 0, orders: 0 };
+    prodMap[d.product].sales += d.sales;
+    prodMap[d.product].profit += d.profit;
+    prodMap[d.product].orders++;
+  });
+  const sorted = Object.values(prodMap).sort((a,b) => b.sales - a.sales).slice(0, 8);
+  const catClass = { Electronics: 'tag-elec', Furniture: 'tag-furn', 'Office Supplies': 'tag-off' };
+  const tbody = document.getElementById('prodBody');
+  tbody.innerHTML = sorted.map((p,i) => {
+    const pct = ((p.profit / p.sales)*100).toFixed(1);
+    const barW = Math.round((p.profit / sorted[0].profit) * 100);
+    return `<tr>
+      <td style="color:var(--muted);font-size:12px">${i+1}</td>
+      <td style="font-weight:500;color:var(--white)">${p.product}</td>
+      <td><span class="tag ${catClass[p.cat]||''}">${p.cat}</span></td>
+      <td style="color:var(--accent);font-weight:500">${fmt(p.sales)}</td>
+      <td>${fmt(p.profit)}</td>
+      <td>${p.orders}</td>
+      <td><div class="profit-bar-wrap"><div class="profit-bar" style="width:${barW}%"></div></div><span style="font-size:11px;color:var(--accent3);margin-left:6px">${pct}%</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// TRENDS PAGE
+// ============================================================
+function buildTrendLine(data) {
+  const byMonth = {};
+  MONTHS.forEach(m => byMonth[m] = { sales:0, profit:0, orders:0 });
+  data.forEach(d => { byMonth[d.month].sales += d.sales; byMonth[d.month].profit += d.profit; byMonth[d.month].orders++; });
+  const labels = MONTHS.filter(m => data.some(d => d.month === m));
+  mkChart('trendLine', 'line', {
+    labels,
+    datasets: [
+      { label:'Sales', data:labels.map(m=>byMonth[m].sales), borderColor:COLORS.accent, backgroundColor:'rgba(0,229,255,.06)', fill:true, tension:.4, pointRadius:5, pointBackgroundColor:COLORS.accent },
+      { label:'Profit', data:labels.map(m=>byMonth[m].profit), borderColor:COLORS.accent3, backgroundColor:'rgba(16,185,129,.06)', fill:true, tension:.4, pointRadius:5, pointBackgroundColor:COLORS.accent3 }
+    ]
+  }, baseOpts());
+}
+
+function buildAreaChart(data) {
+  const byMonth = {};
+  MONTHS.forEach(m => byMonth[m] = 0);
+  data.forEach(d => { byMonth[d.month] += d.sales; });
+  const labels = MONTHS.filter(m => data.some(d => d.month === m));
+  let cum = 0;
+  const cumVals = labels.map(m => { cum += byMonth[m]; return cum; });
+  mkChart('areaChart', 'line', {
+    labels,
+    datasets: [{ label:'Cumulative Sales', data:cumVals, borderColor:COLORS.accent2, backgroundColor:'rgba(124,58,237,.15)', fill:true, tension:.4, pointRadius:4, pointBackgroundColor:COLORS.accent2 }]
+  }, baseOpts());
+}
+
+function buildAvgChart(data) {
+  const byMonth = {};
+  MONTHS.forEach(m => byMonth[m] = { sales:0, orders:0 });
+  data.forEach(d => { byMonth[d.month].sales += d.sales; byMonth[d.month].orders++; });
+  const labels = MONTHS.filter(m => data.some(d => d.month === m));
+  mkChart('avgChart', 'bar', {
+    labels,
+    datasets: [{ label:'Avg Order Value', data:labels.map(m => byMonth[m].orders > 0 ? Math.round(byMonth[m].sales/byMonth[m].orders) : 0), backgroundColor:COLORS.accent4+'99', borderRadius:6, borderSkipped:false }]
+  }, { ...baseOpts(), plugins:{ legend:{display:false}, tooltip:{backgroundColor:'#111827',borderColor:COLORS.border,borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8'} } });
+}
+
+// ============================================================
+// CATEGORIES PAGE
+// ============================================================
+function buildCatBar(data) {
+  const cats = ['Electronics','Furniture','Office Supplies'];
+  const qs = ['Q1','Q2','Q3','Q4'];
+  mkChart('catBar', 'bar', {
+    labels: cats,
+    datasets: [
+      { label:'Sales', data:cats.map(c=>data.filter(d=>d.cat===c).reduce((s,d)=>s+d.sales,0)), backgroundColor:[COLORS.accent+'cc',COLORS.accent2+'cc',COLORS.accent3+'cc'], borderRadius:6, borderSkipped:false }
+    ]
+  }, { ...baseOpts(), plugins:{legend:{display:false},tooltip:{backgroundColor:'#111827',borderColor:COLORS.border,borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8'}} });
+}
+
+function buildCatPie(data) {
+  const cats = ['Electronics','Furniture','Office Supplies'];
+  mkChart('catPie', 'pie', {
+    labels: cats,
+    datasets: [{ data:cats.map(c=>data.filter(d=>d.cat===c).reduce((s,d)=>s+d.profit,0)), backgroundColor:[COLORS.accent,COLORS.accent2,COLORS.accent3], borderColor:'#111827', borderWidth:3 }]
+  }, { ...baseOpts(), scales:{}, plugins:{ legend:{position:'bottom',labels:{color:COLORS.muted,font:defaultFont,boxWidth:10,padding:12}}, tooltip:{backgroundColor:'#111827',borderColor:COLORS.border,borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8'} } });
+}
+
+function buildCatQBar(data) {
+  const cats = ['Electronics','Furniture','Office Supplies'];
+  const qs = ['Q1','Q2','Q3','Q4'];
+  const qColors = [COLORS.accent, COLORS.accent2, COLORS.accent3, COLORS.accent4];
+  mkChart('catQBar', 'bar', {
+    labels: cats,
+    datasets: qs.map((q,i) => ({
+      label:q, data:cats.map(c=>data.filter(d=>d.cat===c&&d.q===q).reduce((s,d)=>s+d.sales,0)),
+      backgroundColor:qColors[i]+'bb', borderRadius:4, borderSkipped:false
+    }))
+  }, { ...baseOpts(), plugins:{ legend:{position:'top',labels:{color:COLORS.muted,font:defaultFont,boxWidth:10}}, tooltip:{backgroundColor:'#111827',borderColor:COLORS.border,borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8'} } });
+}
+
+// ============================================================
+// REGIONS PAGE
+// ============================================================
+function buildRegCharts(data) {
+  const regs = ['North','South','East','West'];
+  const regIds = { North:'r-north', South:'r-south', East:'r-east', West:'r-west' };
+  regs.forEach(r => {
+    const s = data.filter(d=>d.region===r).reduce((a,d)=>a+d.sales,0);
+    document.getElementById(regIds[r]).textContent = fmt(s);
+  });
+  const vals = regs.map(r=>data.filter(d=>d.region===r).reduce((s,d)=>s+d.sales,0));
+  mkChart('regBar','bar',{
+    labels:regs,
+    datasets:[{ label:'Sales', data:vals, backgroundColor:regs.map(r=>REG_COLORS[r]+'bb'), borderRadius:8, borderSkipped:false }]
+  },{...baseOpts(),plugins:{legend:{display:false},tooltip:{backgroundColor:'#111827',borderColor:COLORS.border,borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8'}}});
+  mkChart('regPie','doughnut',{
+    labels:regs,
+    datasets:[{ data:vals, backgroundColor:regs.map(r=>REG_COLORS[r]), borderColor:'#111827', borderWidth:3, hoverOffset:8 }]
+  },{...baseOpts(),scales:{},cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:COLORS.muted,font:defaultFont,boxWidth:10,padding:12}},tooltip:{backgroundColor:'#111827',borderColor:COLORS.border,borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8'}}});
+}
+
+// ============================================================
+// INIT
+// ============================================================
+refresh();
+</script>
+</body>
+</html>

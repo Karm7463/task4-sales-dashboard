@@ -1,0 +1,61 @@
+Order_ID,Date,Region,Category,Product,Sales,Profit,Quantity,Discount
+1001,2024-01-05,North,Electronics,Laptop,1200,240,1,0.05
+1002,2024-01-08,South,Furniture,Chair,350,70,2,0.10
+1003,2024-01-12,East,Electronics,Phone,800,160,3,0.00
+1004,2024-01-15,West,Office Supplies,Pens,45,9,10,0.00
+1005,2024-01-20,North,Furniture,Desk,650,130,1,0.05
+1006,2024-02-02,South,Electronics,Tablet,950,190,2,0.05
+1007,2024-02-07,East,Office Supplies,Paper,120,24,5,0.00
+1008,2024-02-11,West,Furniture,Bookshelf,420,84,1,0.10
+1009,2024-02-14,North,Electronics,Monitor,550,110,2,0.00
+1010,2024-02-19,South,Office Supplies,Stapler,80,16,3,0.00
+1011,2024-03-03,East,Electronics,Laptop,1300,260,1,0.00
+1012,2024-03-06,West,Furniture,Chair,380,76,2,0.05
+1013,2024-03-10,North,Electronics,Phone,850,170,2,0.00
+1014,2024-03-15,South,Office Supplies,Notebook,60,12,8,0.00
+1015,2024-03-20,East,Furniture,Desk,700,140,1,0.00
+1016,2024-04-04,West,Electronics,Tablet,1000,200,1,0.05
+1017,2024-04-08,North,Office Supplies,Paper,90,18,4,0.00
+1018,2024-04-12,South,Furniture,Bookshelf,450,90,2,0.00
+1019,2024-04-17,East,Electronics,Monitor,600,120,1,0.10
+1020,2024-04-22,West,Office Supplies,Pens,50,10,12,0.00
+1021,2024-05-05,North,Electronics,Laptop,1150,230,1,0.05
+1022,2024-05-09,South,Furniture,Chair,320,64,3,0.00
+1023,2024-05-14,East,Electronics,Phone,780,156,2,0.00
+1024,2024-05-18,West,Office Supplies,Stapler,75,15,4,0.00
+1025,2024-05-23,North,Furniture,Desk,680,136,1,0.00
+1026,2024-06-01,South,Electronics,Tablet,920,184,2,0.00
+1027,2024-06-06,East,Office Supplies,Paper,110,22,6,0.00
+1028,2024-06-10,West,Furniture,Bookshelf,400,80,1,0.05
+1029,2024-06-15,North,Electronics,Monitor,580,116,2,0.05
+1030,2024-06-20,South,Office Supplies,Notebook,55,11,9,0.00
+1031,2024-07-03,East,Electronics,Laptop,1250,250,1,0.00
+1032,2024-07-07,West,Furniture,Chair,360,72,2,0.10
+1033,2024-07-11,North,Electronics,Phone,820,164,1,0.00
+1034,2024-07-16,South,Office Supplies,Paper,100,20,5,0.00
+1035,2024-07-21,East,Furniture,Desk,720,144,1,0.00
+1036,2024-08-05,West,Electronics,Tablet,980,196,1,0.05
+1037,2024-08-09,North,Office Supplies,Pens,55,11,10,0.00
+1038,2024-08-13,South,Furniture,Bookshelf,430,86,2,0.00
+1039,2024-08-18,East,Electronics,Monitor,570,114,1,0.00
+1040,2024-08-22,West,Office Supplies,Stapler,70,14,3,0.00
+1041,2024-09-04,North,Electronics,Laptop,1350,270,1,0.00
+1042,2024-09-08,South,Furniture,Chair,390,78,2,0.05
+1043,2024-09-12,East,Electronics,Phone,900,180,3,0.00
+1044,2024-09-17,West,Office Supplies,Notebook,65,13,7,0.00
+1045,2024-09-22,North,Furniture,Desk,750,150,1,0.00
+1046,2024-10-06,South,Electronics,Tablet,1050,210,2,0.00
+1047,2024-10-10,East,Office Supplies,Paper,130,26,6,0.00
+1048,2024-10-15,West,Furniture,Bookshelf,460,92,1,0.00
+1049,2024-10-20,North,Electronics,Monitor,620,124,2,0.05
+1050,2024-10-25,South,Office Supplies,Pens,60,12,15,0.00
+1051,2024-11-03,East,Electronics,Laptop,1400,280,1,0.00
+1052,2024-11-07,West,Furniture,Chair,410,82,3,0.00
+1053,2024-11-11,North,Electronics,Phone,950,190,2,0.05
+1054,2024-11-16,South,Office Supplies,Stapler,85,17,4,0.00
+1055,2024-11-21,East,Furniture,Desk,780,156,1,0.10
+1056,2024-12-02,West,Electronics,Tablet,1100,220,1,0.00
+1057,2024-12-06,North,Office Supplies,Paper,140,28,7,0.00
+1058,2024-12-10,South,Furniture,Bookshelf,480,96,2,0.00
+1059,2024-12-15,East,Electronics,Monitor,640,128,1,0.00
+1060,2024-12-20,West,Office Supplies,Notebook,70,14,8,0.00
